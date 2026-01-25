@@ -1,18 +1,19 @@
 {
   "manifest_version": 2,
-  "name": "Borderify",
+  "name": "Eztypr",
   "version": "1.0",
-
   "description": "Adds a red border to all webpages matching mozilla.org.",
-  "action": {},
   "icons": {
     "48": "icons/border-48.png"
   },
-
-  "content_scripts": [
-    {
-      "matches": ["*://docs.google.com/*"],
-      "js": ["main.js"]
-    }
-  ]
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "*://docs.google.com/*"
+  ],
+  "browser_action": {
+    "default_title": "Eztypr",
+    "default_popup": "popup/menu2.html"
+  }
 }
+
