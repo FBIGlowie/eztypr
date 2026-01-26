@@ -11,8 +11,7 @@
 #### - Adding random delay to each character typed
 #### - Text Highlighting to see which words are affected
 </div>
-<br>
-
+<br><br><br>
 > [!IMPORTANT]
 > This extension is only available for Firefox.
 
