@@ -14,6 +14,10 @@
   "browser_action": {
     "default_title": "Eztypr",
     "default_popup": "popup/menu2.html"
+  },
+  "icons": {
+    "32": "./.eztypr_logo_small.png",
+    "64": "./.eztypr_logo_small_64.png"
   }
 }
 
