@@ -41,7 +41,7 @@ class KeySim {
         document.body.appendChild(this.block);
         this.prog = document.createElement("p");
         this.prog.id = "typingProgress";
-        this.prog.innerHTML = "Currently Typing: ";
+        this.prog.textContent = "Currently Typing: ";
         this.prog.style.color = "white";
         this.prog.style.fontSize = "34px";
         this.prog.style.textAlign = "center";
@@ -71,10 +71,10 @@ class KeySim {
           if (this.stopReq) { this.stopReq = false; return await this.end() } // stop request handling logic
           const word = wordList[i];
           this.percentageDone = wordList.indexOf(word) / wordList.length; // update percenage
-          this.prog.innerHTML = `Currently Typing: ${(Math.round(this.percentageDone * 100))}% done.` // update the blocker's percentage shown
+          this.prog.textContent = `Currently Typing: ${(Math.round(this.percentageDone * 100))}% done.` // update the blocker's percentage shown
           if (word.pause) { // pause logic
             console.log("pausing")
-            this.prog.innerHTML = `Currently Typing: ${(Math.round(this.percentageDone * 100))}% done.\nPausing for ${word.dur / 1000 / 60} minutes.`
+            this.prog.textContent = `Currently Typing: ${(Math.round(this.percentageDone * 100))}% done.\nPausing for ${word.dur / 1000 / 60} minutes.`
             await this.delay(word.dur);
           }
 
