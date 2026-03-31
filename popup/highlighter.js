@@ -24,7 +24,7 @@ class Popup {
 
   wordList = [];
 
-  
+
   syncScroll() {
     if (!this.textarea || !this.backdrop) return;
     this.backdrop.scrollTop = this.textarea.scrollTop;
@@ -32,99 +32,99 @@ class Popup {
   }
 
   applyHighlight(safeText, wordList) {
-        wordList.forEach(word => {
-            var colorClass = "bg-yellow-300";
-            // Escape special regex chars in the WORD itself (in case word is "C++")
-            const escapedWord = word.filteredWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            
-            // STRICT REGEX:
-            // (?<!\w) -> Lookbehind: Must NOT be preceded by a letter/number
-            // (?!\w)  -> Lookahead: Must NOT be followed by a letter/number
-            // This ensures "packet" matches inside "packet". but "pack" does NOT match inside "packet"
-            const regex = new RegExp(`(?<!\\w)(${escapedWord})(?!\\w)`, 'gi');
+    wordList.forEach(word => {
+      var colorClass = "bg-yellow-300";
+      // Escape special regex chars in the WORD itself (in case word is "C++")
+      const escapedWord = word.filteredWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // STRICT REGEX:
+      // (?<!\w) -> Lookbehind: Must NOT be preceded by a letter/number
+      // (?!\w)  -> Lookahead: Must NOT be followed by a letter/number
+      // This ensures "packet" matches inside "packet". but "pack" does NOT match inside "packet"
+      const regex = new RegExp(`(?<!\\w)(${escapedWord})(?!\\w)`, 'gi');
 
 
-            if (word.misspell) {
-              colorClass = 'bg-red-300'; 
-            } 
-            safeText = safeText.replace(regex, `<span class="${colorClass} text-transparent rounded-sm">$1</span>`);
-        });
-      };
+      if (word.misspell) {
+        colorClass = 'bg-red-300';
+      }
+      safeText = safeText.replace(regex, `<span class="${colorClass} text-transparent rounded-sm">$1</span>`);
+    });
+  };
 
 
 
   generateWordlist(withDelay = false) {
-      let text = this.textarea.value;
+    let text = this.textarea.value;
 
 
-      let escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    let escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      escapedText.split(/\s+/).forEach(word => {
-        const wordobj = {};
-        wordobj.originalword = word;
-        if (!word || word == " ") return; // if word is nothing or space
+    escapedText.split(/\s+/).forEach(word => {
+      const wordobj = {};
+      wordobj.originalword = word;
+      if (!word || word == " ") return; // if word is nothing or space
 
-        filteredWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()"'\[\]]/g, " ").trim();
-        if (!filteredWord) return; 
-        wordobj.filteredWord = filteredWord;
-        
-        //Misspell Logic
-        if (this.misspell_check.checked) {
-          if (filteredWord.length > 6) wordobj.misspell = true;
-          return;
-        }
-        
+      filteredWord = word.replace(/[.,/#!$%^&*;:{}=\-_`~()"'\[\]]/g, " ").trim();
+      if (!filteredWord) return;
+      wordobj.filteredWord = filteredWord;
 
-        
-        //Mistake Logic
-        // between 1 and 100, if the random number is within the range of the mistake_input, add it to list
-        if ((Math.floor(Math.random() * 100) + 1) <= (parseInt(this.mistake_input.value) || 0)) {
-          wordobj.mistake = true
-        }
-
-        if (withDelay) {
-          wordobj.delay = this.delay_input.value; 
-          wordobj.random = Math.floor(Math.random() * (settings.random - 0 + 1) + 0)
-        }
-        
-
-        this.wordList.push(wordobj);
-        //Remove Duplicates
-        this.wordlist = [...new Set(this.wordlist)]
-      })
-  }
-  updateHighlights2() {
-      if (!this.textarea || !this.backdrop) return;
-      let text = this.textarea.value;
-      
-      // 1. Escape HTML to prevent XSS (Do this once)
-      let safeText = text.replace(/&/g, "&amp;")
-                         .replace(/</g, "&lt;")
-                         .replace(/>/g, "&gt;");
-
-      this.generateWordlist()
-
-      this.applyHighlight(safeText, this.wordlist);
-
-      // 4. Handle newline behavior
-      if (safeText.endsWith('\n')) {
-        safeText += '<br><span class="text-transparent">A</span>';
+      //Misspell Logic
+      if (this.misspell_check.checked) {
+        if (filteredWord.length > 6) wordobj.misspell = true;
+        return;
       }
 
-      //add the lists to the object
-      backdrop.innerHTML = safeText + "<br>";
+
+
+      //Mistake Logic
+      // between 1 and 100, if the random number is within the range of the mistake_input, add it to list
+      if ((Math.floor(Math.random() * 100) + 1) <= (parseInt(this.mistake_input.value) || 0)) {
+        wordobj.mistake = true
+      }
+
+      if (withDelay) {
+        wordobj.delay = this.delay_input.value;
+        wordobj.random = Math.floor(Math.random() * (settings.random - 0 + 1) + 0)
+      }
+
+
+      this.wordList.push(wordobj);
+      //Remove Duplicates
+      this.wordlist = [...new this.wordlist]
+    })
+  }
+  updateHighlights2() {
+    if (!this.textarea || !this.backdrop) return;
+    let text = this.textarea.value;
+
+    // 1. Escape HTML to prevent XSS (Do this once)
+    let safeText = text.replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    this.generateWordlist()
+
+    this.applyHighlight(safeText, this.wordlist);
+
+    // 4. Handle newline behavior
+    if (safeText.endsWith('\n')) {
+      safeText += '<br><span class="text-transparent">A</span>';
     }
+
+    //add the lists to the object
+    backdrop.innerHTML = safeText + "<br>";
+  }
 
   async sendMsg() {
     try {
-      const tabs = await browser.tabs.query({active: true, currentWindow: true});
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       console.log(tabs);
-      
+
       browser.tabs.sendMessage(tabs[0].id, {
         command: "write",
         textToWrite: this.wordList,
-    });
-    } catch(error) {
+      });
+    } catch (error) {
       console.error("Error:", error);
     }
   }
@@ -132,7 +132,7 @@ class Popup {
   async startTypeClickHandler() {
     this.button.addEventListener("click", async (e) => {
       console.log("click detected");
-      if (document.getElementById("text-to-write").value != "") { 
+      if (document.getElementById("text-to-write").value != "") {
         if (e.target.tagName !== "BUTTON" || !e.target.closest("#popup-content")) {
           return;
         }
@@ -169,16 +169,16 @@ class Popup {
         this.delay_print.innerHTML = value + " milliseconds";
       }
     })
-    
+
     this.random_delay.addEventListener("input", (e) => {
       this.random_delay_print.innerHTML = " " + this.random_delay.value + " seconds";
     })
-    
+
     this.mistake_input.addEventListener("input", (e) => {
       this.random_delay_print.innerHTML = " " + this.mistake_input.value + "% intensity";
     })
-      
-  
+
+
     document.addEventListener('DOMContentLoaded', () => {
       if (this.textarea) {
         this.textarea.addEventListener('input', this.updateHighlights2);
@@ -194,8 +194,8 @@ class Popup {
       }
     });
 
-    this.startTypeClickHandler(); 
-    browser.tabs.executeScript({file: "/main.js"});
+    this.startTypeClickHandler();
+    browser.tabs.executeScript({ file: "/main.js" });
 
   }
 }

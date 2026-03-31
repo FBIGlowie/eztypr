@@ -50,27 +50,20 @@ class Popup {
     this.backdrop.scrollLeft = this.textarea.scrollLeft;
   }
 
-  applyHighlight(safeText) {
+  applyHighlight() {
     // this is for the problem of having substrings that appear multiple times be computed the same, even if they are different words, like "school" comes before "school-realted" and since this contains "school", it will be computed when "school" itself is computed
     const sortedList = [...this.wordList].sort((a, b) =>
       b.filteredWord.length - a.filteredWord.length
     );
 
+    const safeText = [];
+
     sortedList.forEach(word => {
-      if (word.misspell || word.mistake) {
-        let colorClass = word.misspell ? 'bg-red-300' : 'bg-yellow-300';
-
-        const escapedWord = word.filteredWord.replace(/[.\-_*+?^$`'"{}()|[\]\\]/g, '\\$&');
-
-        const regex = new RegExp(`(?<![\\w\\-])(${escapedWord})(?![\\w\\-])`, 'gi');
-
-        safeText = safeText.replace(regex, (match, p1, offset) => {
-          const precedingText = safeText.slice(0, offset);
-          if (precedingText.lastIndexOf('<') > precedingText.lastIndexOf('>')) {
-            return match; // We are inside a tag, return original
-          }
-          return `<span class="${colorClass} text-transparent rounded-sm">${p1}</span>`;
-        });
+      const escapedWord = word.filteredWord.replace(/[.\-_*+?^$`'"{}()|[\]\\]/g, '\\$&');
+      if (word.mistake) {
+        safeText.push(`<span class="bg-yellow-300 text-transparent rounded-sm">${escapedWord}</span>`);
+      } else {
+        safeText.push(`<span class="text-transparent">${escapedWord}</span>`);
       }
     });
 
@@ -122,22 +115,27 @@ class Popup {
   }
 
   updateHighlights2() {
+    this.backdrop.innerHTML = "";
     if (!this.textarea || !this.backdrop) return;
     let text = this.textarea.value;
     // 1. Escape HTML to prevent XSS (Do this once)
-    let safeText = text.replace(/&/g, "&amp;")
+    let safeExtractedText = text.replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
     this.generateWordlist()
-    safeText = this.applyHighlight(safeText);
+    let safeTextList = this.applyHighlight();
+    if (safeTextList.length <= 1) {
+      return;
+    }
 
     // 4. Handle newline behavior
-    if (safeText.endsWith('\n')) {
-      safeText += '<br><span class="text-transparent">A</span>';
+    if (safeExtractedText.endsWith("\n")) {
+      safeTextList.push('<br><span class="text-transparent">A</span>');
     }
+    safeTextList.push("<br>")
     //add the lists to the object
-    backdrop.innerHTML = safeText + "<br>";
+    this.backdrop.innerHTML = safeTextList.join();
   }
 
   async sendMsg() {
@@ -195,8 +193,8 @@ class Popup {
     const currentUUID = this.writingState.uuid
     await this.requestState();
     while (this.writingState.uuid === currentUUID) {
-      // Yield to the event loop and wait 50ms before checking again
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Yield to the event loop and wait 300ms before checking again
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
     this.setWritingState(this.writingState.currentlyWriting);
   }
